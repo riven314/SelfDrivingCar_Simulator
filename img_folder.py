@@ -1,30 +1,22 @@
 """
 General functions applied on image folder, such as:
-1. copy folder
-2. distribution query on steering angle
-3. query folder size and image number
-4. create header for log file if headless
+1. query folder size and image number
 
-Log
 to be done [10/02/2019]
-1. delete some rows with specified steering angle (keep the path of deleted files)
-2. append augmented data on log file
-
-input: path to folder containing logfile and image folder
+1. add image in image folder
+2. copy image to another image folder
 
 remarks:
 1. assume image folder name is 'IMG'
-2. assume log file name is 'driving_log.csv'
-3. check and convert path class in main
+2. check and convert path class in main
 """
 import os
 from pathlib import Path
-from shutil import copy
+from shutil import copy, copytree
 import pandas as pd
 import matplotlib.pyplot as plt
 
-ORIG_LOG = 'driving_log.csv'
-NEW_LOG = 'driving_log_new.csv'
+NEW_IMG_FOLDER = 'IMG_NEW'
 IMG_FOLDER = 'IMG'
 
 def query_folder(folder_path):
@@ -49,28 +41,23 @@ def query_folder(folder_path):
     print('[image number] %d (.jpg)' % img_num)
     return None
 
-def copy_logfile(file_path):
-    """copy log file and named it as NEW_LOG, saved in the same folder
-    if ther is existing log file named as NEW_LOG, ask user if it is to overwrite
+def copy_imgfolder(folder_path):
+    """ copy all images in original folder to new one called IMG_NEW
+    assume IMG_NEW does not exist
 
     key arguments:
-    file_path -- Path: path to log file csv (to be copied)
+    folder_path -- Path: path to original image folder
     """
-    target_path = file_path.parents[0] / NEW_LOG
+    target_path = folder_path.parents[0]/NEW_IMG_FOLDER
+    # terminate if IMG_NEW exists
     if target_path.exists():
-        is_rm = input('Overwrite existing log file? (y/n)')
-        if is_rm == 'y':
-            os.remove(str(target_path))
-        elif is_rm == 'n':
-            return None
-        else:
-            print('Invalid input!')
-            return None
-    copy(src = str(file_path), dst = str(target_path))
-    print('Copy log file completed')
-    print('[source path] ', file_path)
+        print('Delete IMG_NEW before the execution')
+        return None
+    copytree(src = str(folder_path), dst = str(target_path))
+    print('Copy image folder completed')
+    print('[source path] ', folder_path)
     print('[target path] ', target_path)
-    return None
+    return None 
 
 def unify_path(path_obj):
     """check convert path input as a Path class (introduced in python3)
@@ -82,37 +69,8 @@ def unify_path(path_obj):
         path_obj = Path(path_obj)
     return path_obj
  
-def add_header(file_path):
-    """create header for log file if it is absent
-    overwrite existing log file
-    column order: center, left, right, steering, throttle, brake, speed 
-    
-    key arguments
-    file_path -- Path: path to log file csv
-    """
-    df = pd.read_csv(file_path)
-    if list(df)[0] != 'center':
-        col_names = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
-        df = pd.read_csv(file_path, names = col_names)
-        df.to_csv(file_path, index = False)
-        print('Created header for log file')
-        print('[write path] ', file_path) 
-    return df
-
-def get_steering_dist(file_path, bins = 10):
-    """plot the distribution of steering angle recorded in log file
-    the function assumes there is a header in log file
-
-    key arguments
-    file_path -- Path: path to log file csv
-    """
-    df = pd.read_csv(file_path)
-    plt.hist(df['steering'], bins = bins)
-    print('Print out the distribution of steering angle...')
-    print('[target path] ', file_path)
-    plt.show()
-    return None    
 
 if __name__ == '__main__':
-    parent_path = Path('/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data')
-    get_steering_dist(parent_path/NEW_LOG)
+    p = '/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data/IMG'
+    p = unify_path(p)
+    copy_imgfolder(p)
