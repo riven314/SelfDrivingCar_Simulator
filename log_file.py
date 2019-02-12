@@ -3,11 +3,9 @@ General functions applied on log file, such as:
 1. distribution query on steering angle
 2. create header for log file if headless
 3. copy log file
-
-to be done:
-1. deleted some rows with specified steering angle (keep the path of deleted files)
-2. appended augmented data on log file
-3. change path for log file
+4. deleted some rows with specified steering angle
+5. append augmented data on log file
+6. change path for log file
 
 remarks:
 1. assume log file name is 'driving_log.csv'
@@ -69,7 +67,7 @@ def append_rows(file_path, rows_df):
     print('Log file appended with rows')
     print('[source path] ', file_path)
     print('[number of new rows] %d' % (new_rows - old_rows))
-    return df
+    return None
 
 def replace_path(orig_path, update_root):
     """replace the root path of orig_path by update_root
