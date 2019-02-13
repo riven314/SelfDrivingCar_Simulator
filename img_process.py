@@ -19,16 +19,41 @@ from img_folder import *
 from log_file import *
 
 def main():
-    """copy log file, then add header, then delete rows, then augment data and append them
+    """ 
+    put all actions in series: add headers, copy, delete rows, augment data
+    """ 
+    # set up arguments
+    parser = argparse.ArgumentParser(description = 'Image Processing')
+    parser.add_argument('-p', help = 'path to log file', dest = 'log_path', type = str, default = None)
+    parser.add_argument('-c', help = 'copy or overwrite log file', dest = 'is_cp', type = int, default = 0) 
+    parser.add_argument('-d', help = 'number of rows to be deleted', dest = 'rm_rows', type = int, default = 0)
+    parser.add_argument('-e', help = 'change root path of image pointers', dest = 'img_root', type = str, default = None)
+    parser.add_argument('-a', help = 'trigger for data augmentation', dest = 'is_aug', type = int, default = 0)
+    args = parser.parse_args()
     
-    key arguments
-    file_path
-    rm_rows
-    is_aug
-    """
-    
-
-
+    # print out parameters
+    print('-' * 30) 
+    print('Parameters')
+    print('-' * 30) 
+    for key, value in vars(args).items():
+        print('{:<20} := {}'.format(key, value))
+    print('-' * 30) 
+        
+    log_path = Path(args.log_path)
+    # decide if copy log file or not
+    if args.is_cp:
+        # copy log file and add headers
+        log_path = respawn_log_copy(log_path)
+        log_path = Path(log_path)
+        print('[log_path] ', log_path)
+    if args.rm_rows:
+        delete_rows(log_path, rm_rows = args.rm_rows) 
+    if args.img_root is not None:
+        replace_root = Path(args.img_root)
+        edit_log_path(log_path, replace_root)
+    if args.is_aug:
+        augment_run(log_path)
+    pass
 
 
 def augment_run(file_path):
@@ -42,7 +67,7 @@ def augment_run(file_path):
     # only consider data with steering != 0
     filter_df = df[df.steering != 0]
     # create appended data 
-    aug_data = augment_run(filter_df)
+    aug_data = gen_augment_data(filter_df)
     # transform list of dict into dataframe
     aug_data = syn_rows(aug_data)
     # appended data on log file
@@ -76,9 +101,10 @@ def gen_augment_row(row):
     speed = row['speed']
     # augmented data info
     aug_row = {}
-    aug_row['center'] = flip_img(center_path)
-    aug_row['left'] = flip_img(left_path)
-    aug_row['right'] = flip_img(right_path)
+    # input Path instead of str
+    aug_row['center'] = flip_img(Path(center_path))
+    aug_row['left'] = flip_img(Path(left_path))
+    aug_row['right'] = flip_img(Path(right_path))
     aug_row['steering'] = steering * -1
     aug_row['throttle'] = throttle
     aug_row['speed'] = speed
@@ -95,14 +121,8 @@ def flip_img(in_path):
     new_filename = in_path.stem + '_aug' + in_path.suffix
     out_path = in_path.parents[0]/new_filename
     im.transpose(Image.FLIP_LEFT_RIGHT).save(out_path)
-    return out_path
+    # output str instead of Path
+    return str(out_path)
 
 if __name__ == '__main__':
-    img_file = 'left_2019_02_09_23_04_53_468.jpg'
-    root_path = '/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data/IMG_NEW'
-    p = Path(root_path)/img_file
-    print(ORIG_LOG)
-    print(NEW_LOG)
-    #out_path = flip_img(p)
-    #print(out_path)
-
+    main()

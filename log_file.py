@@ -62,11 +62,13 @@ def append_rows(file_path, rows_df):
     """
     df = pd.read_csv(file_path)
     old_nrows = df.shape[0]
-    df.append(rows_df).reset_index(drop = True, inplace = True)
+    df = df.append(rows_df)
+    df.reset_index(drop = True, inplace = True)
     new_nrows = df.shape[0]
+    df.to_csv(file_path, index = False)
     print('Log file appended with rows')
     print('[source path] ', file_path)
-    print('[number of new rows] %d' % (new_rows - old_rows))
+    print('[number of new rows] %d' % (new_nrows - old_nrows))
     return None
 
 def replace_path(orig_path, update_root):
@@ -88,8 +90,8 @@ def edit_log_path(file_path, update_root):
     file_path -- Path: path to log file csv
     update_path -- Path: path to be amended on log file
     """
-    orig_root = file_path.parents[0]
     df = pd.read_csv(file_path)
+    orig_root = Path(df.center[0]).parents[0]
     df.center = df.center.apply(lambda x: replace_path(Path(x), update_root))
     df.right = df.right.apply(lambda x: replace_path(Path(x), update_root))
     df.left = df.left.apply(lambda x: replace_path(Path(x), update_root))
@@ -155,11 +157,12 @@ def copy_logfile(file_path):
 
 def respawn_log_copy(file_path):
     copy_logfile(file_path)
-    new_path = p.parents[0]/NEW_LOG
+    new_path = file_path.parents[0]/NEW_LOG
     create_header(new_path)
-    return None
+    return new_path
 
 if __name__ == '__main__':
+    # testing
     parent_path = Path('/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data')
     p = parent_path/ORIG_LOG
-    respawn_log_copy(p)
+    #respawn_log_copy(p)

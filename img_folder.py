@@ -15,6 +15,7 @@ from pathlib import Path
 from shutil import copy, copytree
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
 
 NEW_IMG_FOLDER = 'IMG_NEW'
 IMG_FOLDER = 'IMG'
@@ -71,6 +72,7 @@ def unify_path(path_obj):
  
 
 if __name__ == '__main__':
+    # testing
     p = '/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data/IMG'
     p = unify_path(p)
-    copy_imgfolder(p)
+    #copy_imgfolder(p)
