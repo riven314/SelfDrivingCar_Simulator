@@ -156,13 +156,39 @@ def copy_logfile(file_path):
     return None
 
 def respawn_log_copy(file_path):
+    """copy new log file, add header for copied log
+
+    key arguments
+    file_path -- Path: path to the log file
+    """
     copy_logfile(file_path)
     new_path = file_path.parents[0]/NEW_LOG
     create_header(new_path)
     return new_path
 
+def melt_log(file_path):
+    """center, left and right flatten into row and saved in-place
+    assume the log file has header
+
+    key arguements
+    file_path -- Path: path to the log file
+    """
+    df = pd.read_csv(file_path)
+    melt_df = pd.melt(df, 
+                    id_vars = ['brake', 'speed', 'steering', 'throttle'],
+                    value_vars = ['center', 'left', 'right'])
+    # rename column
+    melt_df.rename(columns = {'value': 'path'}, inplace = True)
+    # rearrange column order
+    melt_df = melt_df[['path', 'steering', 'throttle', 'brake', 'speed']]
+    melt_df.sort_values(by = 'path', inplace = True)
+    melt_df.to_csv(file_path, index = False)
+    print('Log file melted')
+    print('[source path] ', file_path)
+    return None
+
 if __name__ == '__main__':
     # testing
     parent_path = Path('/Users/hongyeah2151/Desktop/HKU/MDASC/2019_Sem2/Projects/donkey_car/sim_data')
-    p = parent_path/ORIG_LOG
-    #respawn_log_copy(p)
+    p = parent_path/NEW_LOG
+    melt_log(p)

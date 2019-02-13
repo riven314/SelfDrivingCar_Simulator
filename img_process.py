@@ -46,6 +46,8 @@ def main():
         log_path = respawn_log_copy(log_path)
         log_path = Path(log_path)
         print('[log_path] ', log_path)
+    # create header for orig log if it is used and it has no header
+    create_header(log_path)
     if args.rm_rows:
         delete_rows(log_path, rm_rows = args.rm_rows) 
     if args.img_root is not None:
@@ -53,6 +55,10 @@ def main():
         edit_log_path(log_path, replace_root)
     if args.is_aug:
         augment_run(log_path)
+    # only remain the filename for each img paths
+    edit_log_path(log_path, Path(''))
+    # melt the log file
+    melt_log(log_path)
     pass
 
 
@@ -108,6 +114,7 @@ def gen_augment_row(row):
     aug_row['steering'] = steering * -1
     aug_row['throttle'] = throttle
     aug_row['speed'] = speed
+    aug_row['brake'] = brake
     return aug_row
 
 def flip_img(in_path):
