@@ -2,11 +2,11 @@
 This repo documents my work on training a CNN model for self-driving car. I use the simulator developed by Udacity for car driving. I deployed fastai framework for model training. I experimented with different models, the first two being pretrained ResNet34 and the CNN proposed by NVIDIA in literature.
 
 ## Design
-*drive.py*: load in trained model and drive the car in simulator
-*log_file.py*: helper functions applied on log file
-*img_folder.py*: helper functions applied on image folder
-*img_process.py*: applied *log_file.py* and *img_folder.py* for image processing.
-*model_resnet34.ipynb*: first attempt in training resnet34 by fastai v1.0 on Google Colab
+*drive.py*: load in trained model and drive the car in simulator<br/>
+*log_file.py*: helper functions applied on log file<br/>
+*img_folder.py*: helper functions applied on image folder<br/>
+*img_process.py*: applied *log_file.py* and *img_folder.py* for image processing.<br/>
+*model_resnet34.ipynb*: first attempt in training resnet34 by fastai v1.0 on Google Colab<br/>
 
 ## References
 1. [literature] [End to End Learning for Self-driving Car" - NVIDIA](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf)
