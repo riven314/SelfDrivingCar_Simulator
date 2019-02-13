@@ -2,7 +2,7 @@
 This repo documents my work on training a CNN model for self-driving car. I use the simulator developed by Udacity for car driving. I deployed fastai framework for model training. I experimented with different models, the first two being pretrained ResNet34 and the CNN proposed by NVIDIA in literature.
 
 ## Dependencies
-I use [an open-source simulator developed by Udacity](https://github.com/udacity/self-driving-car-sim) for self-driving simulation, and I use [fastai version1.0 framework](https://github.com/fastai/fastai) for model training.
+I use an open-source [simulator developed by Udacity](https://github.com/udacity/self-driving-car-sim) for self-driving simulation, and I use [fastai version1.0 framework](https://github.com/fastai/fastai) for model training.
 
 ## Design
 - *drive.py*: load in trained model and drive the car in simulator<br/>
