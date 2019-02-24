@@ -8,21 +8,20 @@ import numpy as np
 import socketio
 import eventlet
 import eventlet.wsgi
-from PIL import Image
+import PIL
 from flask import Flask
 from io import BytesIO
 
-from keras.models import load_model
-
-import utils
+from pathlib import Path
+from drive_util import *
 
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
 prev_image_array = None
 
-MAX_SPEED = 25
-MIN_SPEED = 10
+MAX_SPEED = 23
+MIN_SPEED = 18
 
 speed_limit = MAX_SPEED
 
@@ -38,7 +37,7 @@ def telemetry(sid, data):
         # The current speed of the car
         speed = float(data["speed"])
         # The current image from the center camera of the car
-        image = Image.open(BytesIO(base64.b64decode(data["image"])))
+        image = PIL.Image.open(BytesIO(base64.b64decode(data["image"])))
         # save frame
         if args.image_folder != '':
             timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
@@ -46,13 +45,13 @@ def telemetry(sid, data):
             image.save('{}.jpg'.format(image_filename))
 
         try:
-            image = np.asarray(image)       # from PIL image to numpy array
+            #image = np.asarray(image)       # from PIL image to numpy array
             # resize, crop and change to other color channel
-            image = utils.preprocess(image) # apply the preprocessing
-            image = np.array([image])       # the model expects 4D array
+            #image = utils.preprocess(image) # apply the preprocessing
+            #image = np.array([image])       # the model expects 4D array
 
             # predict the steering angle for the image
-            steering_angle = float(model.predict(image, batch_size=1))
+            steering_angle = float(predict_from_pil2(image, model))
             # lower the throttle as the speed increases
             # if the speed is above the current speed limit, we are on a downhill.
             # make sure we slow down first and then go back to the original max speed.
@@ -60,11 +59,13 @@ def telemetry(sid, data):
             # throttle pos: accelerate up to max speed (30)
             # throttle neg: deccelerate and move backwards 
             global speed_limit
-            if speed > speed_limit:
-                speed_limit = MIN_SPEED  # slow down
+            if speed > MAX_SPEED:
+                throttle = -0.2  # slow down
+            elif speed <= MAX_SPEED and speed >= MIN_SPEED:
+                throttle = 0.1
             else:
-                speed_limit = MAX_SPEED
-            throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
+                throttle = 0.2
+            #throttle = 1.0 - steering_angle**2 - (speed/speed_limit)**2
 			
             print('{} {} {}'.format(steering_angle, throttle, speed))
             send_control(steering_angle, throttle)
@@ -95,20 +96,30 @@ def send_control(steering_angle, throttle):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument(
-        'model',
+        '-m',
+        dest = 'model',
         type=str,
-        help='Path to model h5 file. Model should be on the same path.'
+        help='Path to model file(exclude suffix)'
     )
     parser.add_argument(
-        'image_folder',
+        '-d',
+        dest = 'data',
         type=str,
-        nargs='?',
+        help = 'Path to data folder'
+
+    )
+    parser.add_argument(
+        '-i',
+        dest = 'image_folder',
+        type=str,
         default='',
         help='Path to image folder. This is where the images from the run will be saved.'
     )
     args = parser.parse_args()
+    data_path = Path(args.data)
+    model_path = Path(args.model)
 
-    model = load_model(args.model)
+    model = load_model(data_path, model_path)
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))
